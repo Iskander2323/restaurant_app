@@ -6,6 +6,7 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:restaurant_app/components/local_db/globals.dart';
+import 'package:restaurant_app/components/order_list/model/order_model.dart';
 import 'package:restaurant_app/components/placement/model/placement_model.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
@@ -28,14 +29,40 @@ class MenuItems extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get itemName => text()();
   RealColumn get itemPrice => real()();
+  IntColumn get itemCount => integer()();
   IntColumn get orderId => integer().references(Orders, #id)();
 }
 
-@DriftDatabase(tables: [Placements])
+@DriftDatabase(tables: [Placements, Orders, MenuItems])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   @override
   int get schemaVersion => 1;
+
+  Future<void> changeOrderStatus(int id, bool isPaid) async {
+    try {
+      await (update(orders)..where((tbl) => tbl.id.equals(id)))
+          .write(OrdersCompanion(
+        isPaid: Value<bool>(isPaid),
+      ));
+    } on Exception catch (e) {
+      log(e.toString(), name: 'UPDATE TO DO');
+    }
+  }
+
+  Future<void> createOrder(OrdersCompanion order) async {
+    try {
+      final orderRowId = await database.into(orders).insert(order);
+      final newInsertedRowId = await (select(orders)
+            ..where((tbl) => tbl.id.equals(orderRowId)))
+          .getSingle();
+      log('SUCCESS');
+      // return newInsertedRowId.id;
+    } on Exception catch (e) {
+      log(e.toString(), name: 'INSERT TO ORDER');
+    }
+    // return null;
+  }
 
   Future<void> addPlacements(List<PlacementModel> listPlacements) async {
     try {
@@ -52,6 +79,25 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
+  Future<void> addOrders(List<OrderModel> listOrders) async {
+    try {
+      await database.batch((batch) {
+        for (var order in listOrders) {
+          batch.insert(
+            orders,
+            OrdersCompanion(
+              sum: Value<double>(order.sum),
+              placementId: Value<int>(order.placementId),
+              isPaid: Value<bool>(order.isPaid),
+            ),
+          );
+        }
+      });
+    } on Exception catch (e) {
+      log(e.toString(), name: 'FROM INSERT ORDERS');
+    }
+  }
+
   Future<List<PlacementModel>> fetchPlacement() async {
     var items = [];
     try {
@@ -62,6 +108,20 @@ class AppDatabase extends _$AppDatabase {
     final result = <PlacementModel>[];
     for (var item in items) {
       result.add(PlacementModel.fromLocal(item));
+    }
+    return result;
+  }
+
+  Future<List<OrderModel>> fetchOrders() async {
+    var items = [];
+    try {
+      items = await select(orders).get();
+    } on Exception catch (e) {
+      log(e.toString());
+    }
+    final result = <OrderModel>[];
+    for (var item in items) {
+      result.add(OrderModel.fromLocal(item));
     }
     return result;
   }

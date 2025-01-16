@@ -19,5 +19,5 @@ final class PlacementState extends Equatable {
   final List<PlacementModel> placements;
   final PlacementStateStatus status;
   @override
-  List<Object> get props => [];
+  List<Object> get props => [placements, status];
 }
