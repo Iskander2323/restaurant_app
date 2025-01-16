@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:restaurant_app/components/bloc/placement_bloc.dart';
+import 'package:restaurant_app/components/placement/bloc/placement_bloc.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
