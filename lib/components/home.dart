@@ -9,7 +9,8 @@ class HomeBlocPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
-      value: BlocProvider.of<PlacementBloc>(context),
+      value: BlocProvider.of<PlacementBloc>(context)
+        ..add(FetchPlacementsEvents()),
       child: HomePage(),
     );
   }

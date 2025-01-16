@@ -6,3 +6,5 @@ sealed class PlacementEvent extends Equatable {
   @override
   List<Object> get props => [];
 }
+
+final class FetchPlacementsEvents extends PlacementEvent {}

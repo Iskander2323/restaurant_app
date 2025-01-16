@@ -1,9 +1,12 @@
+import 'dart:developer';
+
 import 'package:drift/drift.dart';
-import 'package:drift_flutter/drift_flutter.dart';
 import 'dart:io';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:restaurant_app/components/local_db/globals.dart';
+import 'package:restaurant_app/components/placement/model/placement_model.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 
@@ -19,6 +22,35 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   @override
   int get schemaVersion => 1;
+
+  Future<void> addPlacements(List<PlacementModel> listPlacements) async {
+    try {
+      await database.batch((batch) {
+        for (var placement in listPlacements) {
+          batch.insert(
+            placements,
+            PlacementsCompanion(title: Value<String>(placement.placementName)),
+          );
+        }
+      });
+    } on Exception catch (e) {
+      log(e.toString(), name: 'FROM INSERT PLACEMENTS');
+    }
+  }
+
+  Future<List<PlacementModel>> fetchPlacement() async {
+    var items = [];
+    try {
+      items = await select(placements).get();
+    } on Exception catch (e) {
+      log(e.toString());
+    }
+    final result = <PlacementModel>[];
+    for (var item in items) {
+      result.add(PlacementModel.fromLocal(item));
+    }
+    return result;
+  }
 }
 
 LazyDatabase _openConnection() {
