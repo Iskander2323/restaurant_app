@@ -19,7 +19,7 @@ class PlacementsGridView extends StatelessWidget {
       itemBuilder: (context, index) {
         return PlacementCard(placement: placements[index]);
       },
-      itemCount: placements.length,
+      itemCount: 4,
     );
   }
 }

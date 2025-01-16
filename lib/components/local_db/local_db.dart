@@ -17,6 +17,20 @@ class Placements extends Table {
   TextColumn get title => text()();
 }
 
+class Orders extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  RealColumn get sum => real()();
+  IntColumn get placementId => integer().references(Placements, #id)();
+  BoolColumn get isPaid => boolean()();
+}
+
+class MenuItems extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get itemName => text()();
+  RealColumn get itemPrice => real()();
+  IntColumn get orderId => integer().references(Orders, #id)();
+}
+
 @DriftDatabase(tables: [Placements])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:restaurant_app/components/order/bloc/order_bloc.dart';
 import 'package:restaurant_app/components/placement/bloc/placement_bloc.dart';
 import 'package:restaurant_app/components/placement/repository/placement_repository.dart';
 import 'package:restaurant_app/routes.dart';
@@ -16,6 +17,7 @@ class App extends StatelessWidget {
           BlocProvider(
               create: (context) =>
                   PlacementBloc(placementRepository: placementRepository)),
+          BlocProvider(create: (context) => OrderBloc()),
           RepositoryProvider.value(value: placementRepository)
         ],
         child: MaterialApp.router(
